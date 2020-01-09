@@ -1,4 +1,5 @@
 mod color;
+mod ppm;
 
 use color::Color;
 
@@ -6,7 +7,7 @@ fn main() {
     let width = 200;
     let height = 100;
 
-    write_dummy_ppm(width, height, |u: u32, v: u32| -> Color {
+    let output = ppm::get_dummy_content(width, height, |u: u32, v: u32| -> Color {
         let r = u as f32 / width as f32;
         let g = v as f32 / height as f32;
         let b = 0.2f32;
@@ -16,19 +17,7 @@ fn main() {
         let ib = (255.99 * b) as u8;
 
         Color::new(ir, ig, ib)
-    })
-}
+    });
 
-fn write_dummy_ppm<F>(width: u32, height: u32, pixels: F)
-where
-    F: Fn(u32, u32) -> Color,
-{
-    println!("P3\n{} {}\n255", width, height);
-    for j in (0u32..height).rev() {
-        for i in 0u32..width {
-            let color = pixels(i, j);
-
-            println!("{}", color);
-        }
-    }
+    print!("{}", output);
 }

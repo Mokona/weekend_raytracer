@@ -1,5 +1,5 @@
-use std::fmt::{Formatter};
 use std::fmt;
+use std::fmt::Formatter;
 
 pub struct Color(u8, u8, u8);
 
