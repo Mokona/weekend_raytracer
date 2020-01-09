@@ -1,4 +1,6 @@
-struct Color(u8, u8, u8);
+mod color;
+
+use color::Color;
 
 fn main() {
     let width = 200;
@@ -13,7 +15,7 @@ fn main() {
         let ig = (255.99 * g) as u8;
         let ib = (255.99 * b) as u8;
 
-        Color(ir, ig, ib)
+        Color::new(ir, ig, ib)
     })
 }
 
@@ -26,7 +28,7 @@ where
         for i in 0u32..width {
             let color = pixels(i, j);
 
-            println!("{} {} {}", color.0, color.1, color.2);
+            println!("{}", color);
         }
     }
 }
