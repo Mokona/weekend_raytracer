@@ -1,6 +1,6 @@
-use std::ops::{Add, AddAssign, MulAssign, Neg, SubAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, SubAssign};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Vector3 {
     x: f64,
     y: f64,
@@ -92,6 +92,18 @@ impl SubAssign for Vector3 {
     }
 }
 
+impl Mul<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Vector3 {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
+    }
+}
+
 impl MulAssign<f64> for Vector3 {
     fn mul_assign(&mut self, rhs: f64) {
         self.x *= rhs;
@@ -124,6 +136,14 @@ mod tests {
         let v3 = Vector3::from((1., 2., 3.));
 
         assert_eq!(v3, v1 + v2);
+    }
+
+    #[test]
+    fn can_be_multiplied_by_a_scalar() {
+        let v1 = Vector3::from((1., 2., 3.));
+        let v2 = Vector3::from((2., 4., 6.));
+
+        assert_eq!(v2, v1 * 2.);
     }
 
     #[test]
