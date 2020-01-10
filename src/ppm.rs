@@ -1,6 +1,6 @@
 use crate::color::Color;
 
-pub fn get_dummy_content<F>(width: u32, height: u32, pixels: F) -> String
+pub fn get_file_content<F>(width: u32, height: u32, pixels: F) -> String
 where
     F: Fn(u32, u32) -> Color,
 {
