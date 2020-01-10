@@ -12,11 +12,7 @@ fn main() {
         let g = v as f32 / height as f32;
         let b = 0.2f32;
 
-        let ir = (255.99 * r) as u8;
-        let ig = (255.99 * g) as u8;
-        let ib = (255.99 * b) as u8;
-
-        Color::new(ir, ig, ib)
+        Color::from((r, g, b))
     });
 
     print!("{}", output);
