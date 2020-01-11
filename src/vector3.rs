@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Vector3 {
@@ -120,6 +120,18 @@ impl Mul<f64> for Vector3 {
     }
 }
 
+impl Div<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        Vector3 {
+            x: self.x / rhs,
+            y: self.y / rhs,
+            z: self.z / rhs,
+        }
+    }
+}
+
 impl MulAssign<f64> for Vector3 {
     fn mul_assign(&mut self, rhs: f64) {
         self.x *= rhs;
@@ -161,6 +173,14 @@ mod tests {
         let v3 = Vector3::from((-1., -2., -3.));
 
         assert_eq!(v3, v1 - v2);
+    }
+
+    #[test]
+    fn can_be_divided_by_a_scalar() {
+        let v1 = Vector3::from((1., 2., 3.));
+        let v2 = Vector3::from((2., 4., 6.));
+
+        assert_eq!(v1, v2 / 2.);
     }
 
     #[test]
