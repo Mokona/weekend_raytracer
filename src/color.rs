@@ -13,7 +13,7 @@ impl Color {
         Color { r, g, b }
     }
 
-    pub fn lerp(&self, other: Color, t: f32) -> Color {
+    pub fn lerp(self, other: Color, t: f32) -> Color {
         assert!(t <= 1.);
         assert!(t >= 0.);
 
