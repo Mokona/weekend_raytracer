@@ -1,33 +1,20 @@
 mod color;
+mod hit;
 mod ppm;
 mod ray;
 mod vector3;
 
 use color::Color;
+use hit::{Hittable, HittableList, Sphere};
 use ray::Ray;
+use std::f64;
 use vector3::Vector3;
 
-fn hit_sphere(center: Vector3, radius: f64, ray: &Ray) -> Option<f64> {
-    let sphere_to_ray_origin = ray.origin - center;
-    let a = ray.direction.dot(&ray.direction);
-    let b = 2. * sphere_to_ray_origin.dot(&ray.direction);
-    let c = sphere_to_ray_origin.dot(&sphere_to_ray_origin) - radius * radius;
-    let discriminant = b * b - 4. * a * c;
-
-    if discriminant < 0. {
-        None
-    } else {
-        Some((-b - discriminant.sqrt()) / (2. * a))
-    }
-}
-
-fn color(ray: Ray) -> Color {
-    let sphere_center = Vector3::from((0., 0., -1.));
-    let hit_point = hit_sphere(sphere_center, 0.5, &ray);
+fn color(ray: Ray, world: &HittableList) -> Color {
+    let hit_point = world.hit(&ray, 0.0, f64::MAX);
     match hit_point {
-        Some(t) => {
-            let normal = (ray.point_at_parameter(t) - sphere_center).normalized();
-            let half_normal = (normal + Vector3::from((1., 1., 1.))) * 0.5;
+        Some(hit) => {
+            let half_normal = (hit.normal + Vector3::from((1., 1., 1.))) * 0.5;
             Color::from((half_normal.x, half_normal.y, half_normal.z))
         }
         None => {
@@ -51,13 +38,18 @@ fn main() {
     let vertical = Vector3::from((0., 2., 0.));
     let origin = Vector3::new();
 
+    let sphere_1 = Box::new(Sphere::new(Vector3::from((0., 0., -1.)), 0.5));
+    let sphere_2 = Box::new(Sphere::new(Vector3::from((0., -100.5, -1.)), 100.));
+
+    let world = HittableList::new(vec![sphere_1, sphere_2]);
+
     let output = ppm::get_file_content(width, height, |x: u32, y: u32| -> Color {
         let u = x as f64 / width as f64;
         let v = y as f64 / height as f64;
 
         let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
 
-        color(ray)
+        color(ray, &world)
     });
 
     print!("{}", output);
