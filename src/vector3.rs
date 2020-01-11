@@ -30,6 +30,8 @@ impl Vector3 {
     pub fn squared_norm(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
+
+    #[allow(clippy::float_cmp)]
     pub fn normalize(&mut self) {
         let n = self.norm();
         assert_ne!(n, 0.);
@@ -183,6 +185,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::float_cmp)]
     fn can_give_dot_product() {
         let v1 = Vector3::from((1., 0., 0.));
         let v2 = Vector3::from((0., 1., 0.));
@@ -204,6 +207,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::float_cmp)]
     fn can_give_norm() {
         let v1 = Vector3::from((1., 0., 0.));
         let v2 = Vector3::from((2., 1., 3.));
