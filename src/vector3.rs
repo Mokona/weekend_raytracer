@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, SubAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Vector3 {
@@ -64,6 +64,18 @@ impl Add for Vector3 {
             x: self.x + rhs.x,
             y: self.y + rhs.y,
             z: self.z + rhs.z,
+        }
+    }
+}
+
+impl Sub for Vector3 {
+    type Output = Vector3;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Vector3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
         }
     }
 }
@@ -140,6 +152,15 @@ mod tests {
         let v3 = Vector3::from((1., 2., 3.));
 
         assert_eq!(v3, v1 + v2);
+    }
+
+    #[test]
+    fn can_be_subtracted() {
+        let v1 = Vector3::from((0., 0., 0.));
+        let v2 = Vector3::from((1., 2., 3.));
+        let v3 = Vector3::from((-1., -2., -3.));
+
+        assert_eq!(v3, v1 - v2);
     }
 
     #[test]
