@@ -35,6 +35,12 @@ impl std::fmt::Display for Color {
 
 impl From<(f32, f32, f32)> for Color {
     fn from((r, g, b): (f32, f32, f32)) -> Self {
+        Color::from((r as f64, g as f64, b as f64))
+    }
+}
+
+impl From<(f64, f64, f64)> for Color {
+    fn from((r, g, b): (f64, f64, f64)) -> Self {
         let ir = (255.99 * r) as u8;
         let ig = (255.99 * g) as u8;
         let ib = (255.99 * b) as u8;
@@ -61,8 +67,16 @@ mod tests {
     }
 
     #[test]
-    fn can_be_created_from_doubles() {
-        let c1 = Color::from((1., 1., 1.));
+    fn can_be_created_from_f32() {
+        let c1 = Color::from((1.0f32, 1.0f32, 1.0f32));
+        let c2 = Color::new(255, 255, 255);
+
+        assert_eq!(c2, c1);
+    }
+
+    #[test]
+    fn can_be_created_from_f54() {
+        let c1 = Color::from((1.0f64, 1.0f64, 1.0f64));
         let c2 = Color::new(255, 255, 255);
 
         assert_eq!(c2, c1);
