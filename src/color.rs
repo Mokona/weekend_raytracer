@@ -32,7 +32,7 @@ impl From<(f32, f32, f32)> for Color {
 
 impl PartialEq for Color {
     fn eq(&self, other: &Self) -> bool {
-        return self.r == other.r && self.g == other.g && self.b == other.b;
+        self.r == other.r && self.g == other.g && self.b == other.b
     }
 }
 
