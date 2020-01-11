@@ -2,17 +2,17 @@ use crate::ray::Ray;
 use crate::vector3::Vector3;
 
 #[derive(Default)]
-struct HitRecord {
+pub struct HitRecord {
     pub t: f64,
     pub point: Vector3,
     pub normal: Vector3,
 }
 
-trait Hittable {
+pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
-struct HittableList {
+pub struct HittableList {
     list: Vec<Box<dyn Hittable>>,
 }
 
@@ -37,13 +37,13 @@ impl Hittable for HittableList {
     }
 }
 
-struct Sphere {
+pub struct Sphere {
     center: Vector3,
     radius: f64,
 }
 
 impl Sphere {
-    fn new(center: Vector3, radius: f64) -> Self {
+    pub fn new(center: Vector3, radius: f64) -> Self {
         Sphere { center, radius }
     }
 }
