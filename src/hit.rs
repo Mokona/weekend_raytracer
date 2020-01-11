@@ -1,6 +1,7 @@
 use crate::ray::Ray;
 use crate::vector3::Vector3;
 
+#[derive(Default)]
 struct HitRecord {
     pub t: f64,
     pub point: Vector3,
@@ -8,7 +9,32 @@ struct HitRecord {
 }
 
 trait Hittable {
-    fn hit(self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+}
+
+struct HittableList {
+    list: Vec<Box<dyn Hittable>>,
+}
+
+impl HittableList {
+    pub fn new(list: Vec<Box<dyn Hittable>>) -> Self {
+        HittableList { list }
+    }
+}
+
+impl Hittable for HittableList {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        self.list
+            .iter()
+            .fold((t_max, None), |(closest_t, current_hit), b| {
+                if let Some(new_hit) = b.hit(&ray, t_min, closest_t) {
+                    (new_hit.t, Some(new_hit))
+                } else {
+                    (closest_t, current_hit)
+                }
+            })
+            .1
+    }
 }
 
 struct Sphere {
@@ -38,7 +64,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let sphere_to_ray_origin = ray.origin - self.center;
         let a = ray.direction.dot(&ray.direction);
         let b = sphere_to_ray_origin.dot(&ray.direction);
