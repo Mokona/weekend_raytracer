@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, SubAssign};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Vector3 {
     x: f64,
     y: f64,

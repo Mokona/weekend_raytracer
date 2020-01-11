@@ -7,10 +7,7 @@ pub struct Ray {
 
 impl Ray {
     pub fn point_at_parameter(&self, t: f64) -> Vector3 {
-        let mut v = self.direction.clone();
-        v *= t;
-        v += self.origin.clone();
-        v
+        self.origin + self.direction * t
     }
 }
 
