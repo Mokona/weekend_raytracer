@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, SubAssign};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct Vector3 {
     x: f64,
     y: f64,
@@ -9,11 +9,7 @@ pub struct Vector3 {
 
 impl Vector3 {
     pub fn new() -> Self {
-        Vector3 {
-            x: 0.,
-            y: 0.,
-            z: 0.,
-        }
+        Vector3::default()
     }
 
     pub fn dot(&self, other: &Vector3) -> f64 {
