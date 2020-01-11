@@ -38,6 +38,12 @@ impl Vector3 {
 
         *self *= 1. / n;
     }
+
+    pub fn normalized(&self) -> Vector3 {
+        let mut normalized = *self;
+        normalized.normalize();
+        normalized
+    }
 }
 
 impl From<(f64, f64, f64)> for Vector3 {
@@ -224,5 +230,13 @@ mod tests {
         v1.normalize();
 
         assert_eq!(v2, v1);
+    }
+
+    #[test]
+    fn can_return_normalized() {
+        let v1 = Vector3::from((0., 4., 0.));
+        let v2 = Vector3::from((0., 1., 0.));
+
+        assert_eq!(v2, v1.normalized());
     }
 }
