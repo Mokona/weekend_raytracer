@@ -8,9 +8,7 @@ use ray::Ray;
 use vector3::Vector3;
 
 fn color(ray: Ray) -> Color {
-    let mut normalized_direction = ray.point_at_parameter(1.);
-    normalized_direction.normalize();
-
+    let normalized_direction = ray.point_at_parameter(1.).normalized();
     let t = (0.5 * (normalized_direction.y + 1.)) as f32;
 
     let white = Color::new(255, 255, 255);
