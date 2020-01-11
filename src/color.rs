@@ -1,7 +1,7 @@
 use std::fmt;
 use std::fmt::Formatter;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct Color {
     r: u8,
     g: u8,
@@ -11,6 +11,19 @@ pub struct Color {
 impl Color {
     pub fn new(r: u8, g: u8, b: u8) -> Self {
         Color { r, g, b }
+    }
+
+    pub fn lerp(&self, other: Color, t: f32) -> Color {
+        assert!(t <= 1.);
+        assert!(t >= 0.);
+
+        let anti_t = 1. - t;
+
+        Color {
+            r: (self.r as f32 * anti_t + other.r as f32 * t) as u8,
+            g: (self.g as f32 * anti_t + other.g as f32 * t) as u8,
+            b: (self.b as f32 * anti_t + other.b as f32 * t) as u8,
+        }
     }
 }
 
@@ -53,5 +66,16 @@ mod tests {
         let c2 = Color::new(255, 255, 255);
 
         assert_eq!(c2, c1);
+    }
+
+    #[test]
+    fn can_lerp_with_another_color() {
+        let c1 = Color::new(0, 0, 0);
+        let c2 = Color::new(255, 255, 255);
+        let c3 = Color::new(127, 127, 127);
+
+        assert_eq!(c2, c1.lerp(c2, 1.));
+        assert_eq!(c1, c1.lerp(c2, 0.));
+        assert_eq!(c3, c1.lerp(c2, 0.5));
     }
 }
