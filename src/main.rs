@@ -57,10 +57,12 @@ fn main() {
         }
 
         color_accumulator /= sub_sample_count as f64;
+        color_accumulator /= 255.;
+
         Color::from((
             color_accumulator.x,
             color_accumulator.y,
-            color_accumulator.y,
+            color_accumulator.z,
         ))
     });
 
