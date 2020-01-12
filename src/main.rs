@@ -8,7 +8,7 @@ mod vector3;
 
 use color::Color;
 use hit::{Hittable, HittableList, Sphere};
-use material::{LambertianParams, Material, MetalParams};
+use material::{DielectricParams, LambertianParams, Material, MetalParams};
 use rand::Rng;
 use ray::Ray;
 use std::f64;
@@ -89,6 +89,7 @@ fn main() {
         0.5,
         Material::Metal(MetalParams {
             albedo: Vector3::from((0.8, 0.6, 0.2)),
+            fuzziness: 0.3,
         }),
     ));
 
@@ -97,10 +98,29 @@ fn main() {
         0.5,
         Material::Metal(MetalParams {
             albedo: Vector3::from((0.8, 0.8, 0.2)),
+            fuzziness: 1.,
         }),
     ));
 
-    let world = HittableList::new(vec![sphere_1, sphere_2, sphere_3, sphere_4]);
+    let sphere_5 = Box::new(Sphere::new(
+        Vector3::from((-0.3, 0.15, -0.5)),
+        0.15,
+        Material::Dielectric(DielectricParams {
+            refraction_index: 1.5,
+        }),
+    ));
+
+    let sphere_6 = Box::new(Sphere::new(
+        Vector3::from((0.3, -0.15, -0.5)),
+        0.15,
+        Material::Dielectric(DielectricParams {
+            refraction_index: 1.5,
+        }),
+    ));
+
+    let world = HittableList::new(vec![
+        sphere_1, sphere_2, sphere_3, sphere_4, sphere_5, sphere_6,
+    ]);
     let camera = camera::Camera::new();
 
     let output = ppm::get_file_content(width, height, |x: u32, y: u32| -> Color {
