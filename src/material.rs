@@ -15,7 +15,7 @@ pub struct LambertianParams {
 }
 
 fn scatter_lambertian(
-    ray: &Ray,
+    _ray: &Ray,
     hit: &HitRecord,
     params: LambertianParams,
 ) -> Option<(Ray, Vector3)> {
@@ -25,8 +25,8 @@ fn scatter_lambertian(
     Some((diffuse_ray, params.albedo))
 }
 
-pub fn scatter(ray: &Ray, hit: &HitRecord, material: Material) -> Option<(Ray, Vector3)> {
-    match material {
+pub fn scatter(ray: &Ray, hit: &HitRecord) -> Option<(Ray, Vector3)> {
+    match hit.material {
         Material::Lambertian(params) => scatter_lambertian(ray, hit, params),
     }
 }

@@ -12,16 +12,29 @@ use material::{LambertianParams, Material};
 use rand::Rng;
 use ray::Ray;
 use std::f64;
-use vector3::{random_in_unit_sphere, Vector3};
+use vector3::Vector3;
 
-fn color(ray: Ray, world: &HittableList) -> Color {
+const MAX_DEPTH_LIMIT: u32 = 50;
+
+fn color(ray: Ray, world: &HittableList, depth_limit: u32) -> Color {
+    if depth_limit >= MAX_DEPTH_LIMIT {
+        return Color::default();
+    }
+
     let hit_point = world.hit(&ray, 0.001, f64::MAX);
     match hit_point {
         Some(hit) => {
-            let diffuse_direction = hit.point + hit.normal + random_in_unit_sphere();
-            let diffuse_ray = Ray::new(hit.point, diffuse_direction - hit.point);
-            let (r, g, b): (f64, f64, f64) = color(diffuse_ray, world).into();
-            Color::from((r / 2. / 255., g / 2. / 255., b / 2. / 255.))
+            if let Some((reflection_ray, attenuation)) = material::scatter(&ray, &hit) {
+                let (r, g, b): (f64, f64, f64) =
+                    color(reflection_ray, world, depth_limit + 1).into();
+                Color::from((
+                    attenuation.x * r / 255.,
+                    attenuation.y * g / 255.,
+                    attenuation.z * b / 255.,
+                ))
+            } else {
+                Color::default()
+            }
         }
         None => {
             let normalized_direction = ray.point_at_parameter(1.).normalized();
@@ -60,14 +73,14 @@ fn main() {
         Vector3::from((0., 0., -1.)),
         0.5,
         Material::Lambertian(LambertianParams {
-            albedo: Vector3::default(),
+            albedo: Vector3::from((0.2, 1., 0.2)),
         }),
     ));
     let sphere_2 = Box::new(Sphere::new(
         Vector3::from((0., -100.5, -1.)),
         100.,
         Material::Lambertian(LambertianParams {
-            albedo: Vector3::default(),
+            albedo: Vector3::from((0.5, 0.5, 0.5)),
         }),
     ));
 
@@ -83,7 +96,7 @@ fn main() {
             let v = (y as f64 + rng.gen_range(0., 1.)) / height as f64;
 
             let ray = camera.get_ray(u, v);
-            let color = color(ray, &world);
+            let color = color(ray, &world, 0);
             let color_as_tuple: (f64, f64, f64) = color.into();
             color_accumulator += Vector3::from(color_as_tuple);
         }
