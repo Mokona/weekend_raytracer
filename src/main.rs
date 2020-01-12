@@ -112,9 +112,9 @@ fn main() {
 
     let sphere_6 = Box::new(Sphere::new(
         Vector3::from((0.3, -0.15, -0.5)),
-        0.15,
+        -0.20,
         Material::Dielectric(DielectricParams {
-            refraction_index: 1.5,
+            refraction_index: 1.2,
         }),
     ));
 

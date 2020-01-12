@@ -1,6 +1,7 @@
 use crate::hit::HitRecord;
 use crate::ray::Ray;
 use crate::vector3::{random_in_unit_sphere, Vector3};
+use rand::Rng;
 
 type Attenuation = Vector3;
 
@@ -72,6 +73,12 @@ fn refraction(incoming: Vector3, normal: Vector3, ni_over_nt: f64) -> Option<Vec
     }
 }
 
+fn schlick(cosine: f64, refraction_index: f64) -> f64 {
+    let r0_root = (1. - refraction_index) / (1. + refraction_index);
+    let r0 = r0_root * r0_root;
+    r0 + (1. - r0) * (1. - cosine).powf(5.)
+}
+
 fn scatter_dielectric(
     ray: &Ray,
     hit: &HitRecord,
@@ -79,24 +86,26 @@ fn scatter_dielectric(
 ) -> Option<(Ray, Vector3)> {
     let reflected = reflect(ray.direction, hit.normal);
 
-    let (outward_normal, ni_overnt) = if ray.direction.dot(&hit.normal) > 0. {
-        (-hit.normal, params.refraction_index)
+    let (outward_normal, ni_overnt, cosine) = if ray.direction.dot(&hit.normal) > 0. {
+        let cosine =
+            params.refraction_index * ray.direction.dot(&hit.normal) / ray.direction.norm();
+        (-hit.normal, params.refraction_index, cosine)
     } else {
-        (hit.normal, 1.0 / params.refraction_index)
+        let cosine = -ray.direction.dot(&hit.normal) / ray.direction.norm();
+        (hit.normal, 1.0 / params.refraction_index, cosine)
     };
 
-    match refraction(ray.direction, outward_normal, ni_overnt) {
-        Some(refracted) => {
-            let scattered = Ray::new(hit.point, refracted);
-            let attenuation = Vector3::from((1., 1., 1.));
-            Some((scattered, attenuation))
-        }
-        //        None => None, // Should reflect ?
-        None => {
-            let reflected_ray = Ray::new(hit.point, reflected);
-            let attenuation = Vector3::from((1., 1., 1.));
-            Some((reflected_ray, attenuation))
-        }
+    let (reflection_probability, refracted) =
+        match refraction(ray.direction, outward_normal, ni_overnt) {
+            Some(refracted) => (schlick(cosine, params.refraction_index), refracted),
+            None => (1., Vector3::default()),
+        };
+
+    let attenuation = Vector3::from((1., 1., 1.));
+    if rand::thread_rng().gen_range(0., 1.) < reflection_probability {
+        Some((Ray::new(hit.point, reflected), attenuation))
+    } else {
+        Some((Ray::new(hit.point, refracted), attenuation))
     }
 }
 
