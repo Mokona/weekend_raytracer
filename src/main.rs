@@ -7,6 +7,7 @@ mod vector3;
 
 use color::Color;
 use hit::{Hittable, HittableList, Sphere};
+use rand::Rng;
 use ray::Ray;
 use std::f64;
 use vector3::Vector3;
@@ -33,6 +34,7 @@ fn color(ray: Ray, world: &HittableList) -> Color {
 fn main() {
     let width = 400;
     let height = 200;
+    let sub_sample_count = 100;
 
     let sphere_1 = Box::new(Sphere::new(Vector3::from((0., 0., -1.)), 0.5));
     let sphere_2 = Box::new(Sphere::new(Vector3::from((0., -100.5, -1.)), 100.));
@@ -41,12 +43,25 @@ fn main() {
     let camera = camera::Camera::new();
 
     let output = ppm::get_file_content(width, height, |x: u32, y: u32| -> Color {
-        let u = x as f64 / width as f64;
-        let v = y as f64 / height as f64;
+        let mut rng = rand::thread_rng();
+        let mut color_accumulator = Vector3::default();
 
-        let ray = camera.get_ray(u, v);
+        for _i in 0..sub_sample_count {
+            let u = (x as f64 + rng.gen_range(0., 1.)) / width as f64;
+            let v = (y as f64 + rng.gen_range(0., 1.)) / height as f64;
 
-        color(ray, &world)
+            let ray = camera.get_ray(u, v);
+            let color = color(ray, &world);
+            let color_as_tuple: (f64, f64, f64) = color.into();
+            color_accumulator += Vector3::from(color_as_tuple);
+        }
+
+        color_accumulator /= sub_sample_count as f64;
+        Color::from((
+            color_accumulator.x,
+            color_accumulator.y,
+            color_accumulator.y,
+        ))
     });
 
     print!("{}", output);
