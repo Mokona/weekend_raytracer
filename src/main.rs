@@ -31,7 +31,7 @@ fn random_in_unit_sphere() -> Vector3 {
 }
 
 fn color(ray: Ray, world: &HittableList) -> Color {
-    let hit_point = world.hit(&ray, 0.0, f64::MAX);
+    let hit_point = world.hit(&ray, 0.001, f64::MAX);
     match hit_point {
         Some(hit) => {
             let diffuse_direction = hit.point + hit.normal + random_in_unit_sphere();
