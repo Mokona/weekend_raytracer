@@ -51,6 +51,22 @@ fn color(ray: Ray, world: &HittableList) -> Color {
     }
 }
 
+fn simple_gamma_on_component(component: f64) -> f64 {
+    assert!(component <= 255.);
+    (component / 255.).sqrt()
+}
+
+fn simple_gamma_correction(color: Color) -> Color {
+    let color_as_tuple: (f64, f64, f64) = color.into();
+    let fixed_tuple = (
+        simple_gamma_on_component(color_as_tuple.0),
+        simple_gamma_on_component(color_as_tuple.1),
+        simple_gamma_on_component(color_as_tuple.2),
+    );
+
+    Color::from(fixed_tuple)
+}
+
 fn main() {
     let width = 400;
     let height = 200;
@@ -79,11 +95,11 @@ fn main() {
         color_accumulator /= sub_sample_count as f64;
         color_accumulator /= 255.;
 
-        Color::from((
+        simple_gamma_correction(Color::from((
             color_accumulator.x,
             color_accumulator.y,
             color_accumulator.z,
-        ))
+        )))
     });
 
     print!("{}", output);
