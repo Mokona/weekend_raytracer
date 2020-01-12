@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Neg, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Vector3 {
@@ -140,6 +140,14 @@ impl MulAssign<f64> for Vector3 {
     }
 }
 
+impl DivAssign<f64> for Vector3 {
+    fn div_assign(&mut self, rhs: f64) {
+        self.x /= rhs;
+        self.y /= rhs;
+        self.z /= rhs;
+    }
+}
+
 impl PartialEq for Vector3 {
     fn eq(&self, other: &Self) -> bool {
         self.x == other.x && self.y == other.y && self.z == other.z
@@ -229,6 +237,16 @@ mod tests {
         v1 *= 2.;
 
         assert_eq!(v2, v1);
+    }
+
+    #[test]
+    fn can_be_mutably_divided_by_scalar() {
+        let v1 = Vector3::from((1., 2., 3.));
+        let mut v2 = Vector3::from((2., 4., 6.));
+
+        v2 /= 2.;
+
+        assert_eq!(v1, v2);
     }
 
     #[test]
