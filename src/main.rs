@@ -8,7 +8,7 @@ mod vector3;
 
 use color::Color;
 use hit::{Hittable, HittableList, Sphere};
-use material::{LambertianParams, Material};
+use material::{LambertianParams, Material, MetalParams};
 use rand::Rng;
 use ray::Ray;
 use std::f64;
@@ -84,7 +84,23 @@ fn main() {
         }),
     ));
 
-    let world = HittableList::new(vec![sphere_1, sphere_2]);
+    let sphere_3 = Box::new(Sphere::new(
+        Vector3::from((1.3, 0., -1.)),
+        0.5,
+        Material::Metal(MetalParams {
+            albedo: Vector3::from((0.8, 0.6, 0.2)),
+        }),
+    ));
+
+    let sphere_4 = Box::new(Sphere::new(
+        Vector3::from((-1.3, 0., -1.)),
+        0.5,
+        Material::Metal(MetalParams {
+            albedo: Vector3::from((0.8, 0.8, 0.2)),
+        }),
+    ));
+
+    let world = HittableList::new(vec![sphere_1, sphere_2, sphere_3, sphere_4]);
     let camera = camera::Camera::new();
 
     let output = ppm::get_file_content(width, height, |x: u32, y: u32| -> Color {
