@@ -1,3 +1,4 @@
+mod camera;
 mod color;
 mod hit;
 mod ppm;
@@ -33,21 +34,17 @@ fn main() {
     let width = 400;
     let height = 200;
 
-    let lower_left_corner = Vector3::from((-2., -1., -1.));
-    let horizontal = Vector3::from((4., 0., 0.));
-    let vertical = Vector3::from((0., 2., 0.));
-    let origin = Vector3::new();
-
     let sphere_1 = Box::new(Sphere::new(Vector3::from((0., 0., -1.)), 0.5));
     let sphere_2 = Box::new(Sphere::new(Vector3::from((0., -100.5, -1.)), 100.));
 
     let world = HittableList::new(vec![sphere_1, sphere_2]);
+    let camera = camera::Camera::new();
 
     let output = ppm::get_file_content(width, height, |x: u32, y: u32| -> Color {
         let u = x as f64 / width as f64;
         let v = y as f64 / height as f64;
 
-        let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
+        let ray = camera.get_ray(u, v);
 
         color(ray, &world)
     });
