@@ -49,6 +49,15 @@ impl From<(f64, f64, f64)> for Color {
     }
 }
 
+impl<T> Into<(T, T, T)> for Color
+where
+    T: From<u8>,
+{
+    fn into(self) -> (T, T, T) {
+        (self.r.into(), self.g.into(), self.b.into())
+    }
+}
+
 impl PartialEq for Color {
     fn eq(&self, other: &Self) -> bool {
         self.r == other.r && self.g == other.g && self.b == other.b
@@ -91,5 +100,21 @@ mod tests {
         assert_eq!(c2, c1.lerp(c2, 1.));
         assert_eq!(c1, c1.lerp(c2, 0.));
         assert_eq!(c3, c1.lerp(c2, 0.5));
+    }
+
+    #[test]
+    fn can_be_transformed_into_a_tuple() {
+        let c2 = Color::new(255, 100, 50);
+        let t: (u32, u32, u32) = c2.into();
+
+        assert_eq!((255, 100, 50), t);
+    }
+
+    #[test]
+    fn can_be_transformed_into_a_f64_tuple() {
+        let c2 = Color::new(255, 100, 50);
+        let t: (f64, f64, f64) = c2.into();
+
+        assert_eq!((255., 100., 50.), t);
     }
 }
