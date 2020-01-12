@@ -12,12 +12,32 @@ use ray::Ray;
 use std::f64;
 use vector3::Vector3;
 
+fn random_in_unit_sphere() -> Vector3 {
+    use std::iter;
+
+    let mut rng = rand::thread_rng();
+
+    let in_unit_coordinates: (f64, f64, f64) = iter::repeat_with(|| {
+        (
+            rng.gen_range(0., 1.),
+            rng.gen_range(0., 1.),
+            rng.gen_range(0., 1.),
+        )
+    })
+    .skip_while(|(x, y, z)| Vector3::from((*x, *y, *z)).squared_norm() > 1.)
+    .next()
+    .unwrap();
+    Vector3::from(in_unit_coordinates)
+}
+
 fn color(ray: Ray, world: &HittableList) -> Color {
     let hit_point = world.hit(&ray, 0.0, f64::MAX);
     match hit_point {
         Some(hit) => {
-            let half_normal = (hit.normal + Vector3::from((1., 1., 1.))) * 0.5;
-            Color::from((half_normal.x, half_normal.y, half_normal.z))
+            let diffuse_direction = hit.point + hit.normal + random_in_unit_sphere();
+            let diffuse_ray = Ray::new(hit.point, diffuse_direction - hit.point);
+            let (r, g, b): (f64, f64, f64) = color(diffuse_ray, world).into();
+            Color::from((r / 2. / 255., g / 2. / 255., b / 2. / 255.))
         }
         None => {
             let normalized_direction = ray.point_at_parameter(1.).normalized();
@@ -67,4 +87,17 @@ fn main() {
     });
 
     print!("{}", output);
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::random_in_unit_sphere;
+
+    #[test]
+    fn test_random_unit_vector() {
+        for _i in 0..100 {
+            let random_unit = random_in_unit_sphere();
+            assert!(random_unit.squared_norm() <= 1.);
+        }
+    }
 }
