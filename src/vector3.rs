@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[derive(Debug, Copy, Clone, Default)]
@@ -154,6 +155,24 @@ impl PartialEq for Vector3 {
     }
 }
 
+pub fn random_in_unit_sphere() -> Vector3 {
+    use std::iter;
+
+    let mut rng = rand::thread_rng();
+
+    let in_unit_coordinates: (f64, f64, f64) = iter::repeat_with(|| {
+        (
+            rng.gen_range(0., 1.),
+            rng.gen_range(0., 1.),
+            rng.gen_range(0., 1.),
+        )
+    })
+    .skip_while(|(x, y, z)| Vector3::from((*x, *y, *z)).squared_norm() > 1.)
+    .next()
+    .unwrap();
+    Vector3::from(in_unit_coordinates)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -297,5 +316,13 @@ mod tests {
         let v2 = Vector3::from((0., 1., 0.));
 
         assert_eq!(v2, v1.normalized());
+    }
+
+    #[test]
+    fn test_random_unit_vector() {
+        for _i in 0..100 {
+            let random_unit = random_in_unit_sphere();
+            assert!(random_unit.squared_norm() <= 1.);
+        }
     }
 }

@@ -1,11 +1,12 @@
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vector3::Vector3;
 
-#[derive(Default)]
 pub struct HitRecord {
     pub t: f64,
     pub point: Vector3,
     pub normal: Vector3,
+    pub material: Material,
 }
 
 pub trait Hittable {
@@ -40,11 +41,16 @@ impl Hittable for HittableList {
 pub struct Sphere {
     center: Vector3,
     radius: f64,
+    material: Material,
 }
 
 impl Sphere {
-    pub fn new(center: Vector3, radius: f64) -> Self {
-        Sphere { center, radius }
+    pub fn new(center: Vector3, radius: f64, material: Material) -> Self {
+        Sphere {
+            center,
+            radius,
+            material,
+        }
     }
 }
 
@@ -56,6 +62,7 @@ impl Sphere {
                 t: hit,
                 point: hit_point,
                 normal: (hit_point - self.center) / self.radius,
+                material: self.material,
             })
         } else {
             None
@@ -86,10 +93,17 @@ impl Hittable for Sphere {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::material::LambertianParams;
+
+    fn get_dummy_material() -> Material {
+        Material::Lambertian(LambertianParams {
+            albedo: Vector3::default(),
+        })
+    }
 
     #[test]
     fn hits_sphere_from_origin() {
-        let sphere = Sphere::new(Vector3::from((0., 0., -2.)), 1.);
+        let sphere = Sphere::new(Vector3::from((0., 0., -2.)), 1., get_dummy_material());
         let ray = Ray::new(Vector3::default(), Vector3::from((0., 0., -1.)));
 
         let hit = sphere.hit(&ray, 0., 2.).unwrap();
@@ -100,7 +114,7 @@ mod tests {
 
     #[test]
     fn hits_sphere_from_origin_skipping_first_hit() {
-        let sphere = Sphere::new(Vector3::from((0., 0., -2.)), 1.);
+        let sphere = Sphere::new(Vector3::from((0., 0., -2.)), 1., get_dummy_material());
         let ray = Ray::new(Vector3::default(), Vector3::from((0., 0., -1.)));
 
         let hit = sphere.hit(&ray, 2., 4.).unwrap();
@@ -111,7 +125,7 @@ mod tests {
 
     #[test]
     fn hits_sphere_from_origin_skipping_two_hits() {
-        let sphere = Sphere::new(Vector3::from((0., 0., -2.)), 1.);
+        let sphere = Sphere::new(Vector3::from((0., 0., -2.)), 1., get_dummy_material());
         let ray = Ray::new(Vector3::default(), Vector3::from((0., 0., -1.)));
 
         let hit = sphere.hit(&ray, 4., 10.);

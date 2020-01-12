@@ -1,34 +1,18 @@
 mod camera;
 mod color;
 mod hit;
+mod material;
 mod ppm;
 mod ray;
 mod vector3;
 
 use color::Color;
 use hit::{Hittable, HittableList, Sphere};
+use material::{LambertianParams, Material};
 use rand::Rng;
 use ray::Ray;
 use std::f64;
-use vector3::Vector3;
-
-fn random_in_unit_sphere() -> Vector3 {
-    use std::iter;
-
-    let mut rng = rand::thread_rng();
-
-    let in_unit_coordinates: (f64, f64, f64) = iter::repeat_with(|| {
-        (
-            rng.gen_range(0., 1.),
-            rng.gen_range(0., 1.),
-            rng.gen_range(0., 1.),
-        )
-    })
-    .skip_while(|(x, y, z)| Vector3::from((*x, *y, *z)).squared_norm() > 1.)
-    .next()
-    .unwrap();
-    Vector3::from(in_unit_coordinates)
-}
+use vector3::{random_in_unit_sphere, Vector3};
 
 fn color(ray: Ray, world: &HittableList) -> Color {
     let hit_point = world.hit(&ray, 0.001, f64::MAX);
@@ -72,8 +56,20 @@ fn main() {
     let height = 200;
     let sub_sample_count = 100;
 
-    let sphere_1 = Box::new(Sphere::new(Vector3::from((0., 0., -1.)), 0.5));
-    let sphere_2 = Box::new(Sphere::new(Vector3::from((0., -100.5, -1.)), 100.));
+    let sphere_1 = Box::new(Sphere::new(
+        Vector3::from((0., 0., -1.)),
+        0.5,
+        Material::Lambertian(LambertianParams {
+            albedo: Vector3::default(),
+        }),
+    ));
+    let sphere_2 = Box::new(Sphere::new(
+        Vector3::from((0., -100.5, -1.)),
+        100.,
+        Material::Lambertian(LambertianParams {
+            albedo: Vector3::default(),
+        }),
+    ));
 
     let world = HittableList::new(vec![sphere_1, sphere_2]);
     let camera = camera::Camera::new();
@@ -103,17 +99,4 @@ fn main() {
     });
 
     print!("{}", output);
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::random_in_unit_sphere;
-
-    #[test]
-    fn test_random_unit_vector() {
-        for _i in 0..100 {
-            let random_unit = random_in_unit_sphere();
-            assert!(random_unit.squared_norm() <= 1.);
-        }
-    }
 }
