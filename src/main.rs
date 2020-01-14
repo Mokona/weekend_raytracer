@@ -4,13 +4,15 @@ mod hit;
 mod material;
 mod ppm;
 mod ray;
+mod scenes;
 mod vector3;
 
+use camera::Camera;
 use color::Color;
-use hit::{Hittable, HittableList, Sphere};
-use material::{DielectricParams, LambertianParams, Material, MetalParams};
+use hit::{Hittable, HittableList};
 use rand::Rng;
 use ray::Ray;
+use scenes::get_scene_1;
 use std::f64;
 use vector3::Vector3;
 
@@ -64,80 +66,24 @@ fn simple_gamma_correction(color: Color) -> Color {
     Color::from(fixed_tuple)
 }
 
+enum Scene {
+    Scene1,
+    Scene2,
+}
+
+fn get_scene(scene: Scene, geometry: (u32, u32)) -> (HittableList, Camera) {
+    match scene {
+        Scene::Scene1 => get_scene_1(geometry),
+        Scene::Scene2 => get_scene_1(geometry),
+    }
+}
+
 fn main() {
     let width = 400;
     let height = 200;
     let sub_sample_count = 100;
 
-    let sphere_1 = Box::new(Sphere::new(
-        Vector3::from((0., 0., -1.)),
-        0.5,
-        Material::Lambertian(LambertianParams {
-            albedo: Vector3::from((0.2, 1., 0.2)),
-        }),
-    ));
-    let sphere_2 = Box::new(Sphere::new(
-        Vector3::from((0., -100.5, -1.)),
-        100.,
-        Material::Lambertian(LambertianParams {
-            albedo: Vector3::from((0.5, 0.5, 0.5)),
-        }),
-    ));
-
-    let sphere_3 = Box::new(Sphere::new(
-        Vector3::from((1.3, 0., -1.)),
-        0.5,
-        Material::Metal(MetalParams {
-            albedo: Vector3::from((0.8, 0.6, 0.2)),
-            fuzziness: 0.3,
-        }),
-    ));
-
-    let sphere_4 = Box::new(Sphere::new(
-        Vector3::from((-1.3, 0., -1.)),
-        0.5,
-        Material::Metal(MetalParams {
-            albedo: Vector3::from((0.8, 0.8, 0.2)),
-            fuzziness: 1.,
-        }),
-    ));
-
-    let sphere_5 = Box::new(Sphere::new(
-        Vector3::from((-0.5, 0.15, -0.5)),
-        0.15,
-        Material::Dielectric(DielectricParams {
-            refraction_index: 1.5,
-        }),
-    ));
-
-    let sphere_6 = Box::new(Sphere::new(
-        Vector3::from((0.3, -0.15, -0.5)),
-        -0.20,
-        Material::Dielectric(DielectricParams {
-            refraction_index: 1.3,
-        }),
-    ));
-
-    let world = HittableList::new(vec![
-        sphere_1, sphere_2, sphere_3, sphere_4, sphere_5, sphere_6,
-    ]);
-
-    let look_from = Vector3::from((-2., 3., 1.5));
-    let look_at = Vector3::from((0., 0., -1.));
-    let up = Vector3::from((0., 1., 0.));
-
-    let focus_distance = (look_from - look_at).norm();
-    let aperture = 1.1;
-
-    let camera = camera::Camera::new(
-        look_from,
-        look_at,
-        up,
-        45.,
-        width as f64 / height as f64,
-        aperture,
-        focus_distance,
-    );
+    let (world, camera) = get_scene(Scene::Scene1, (width, height));
 
     let output = ppm::get_file_content(width, height, |x: u32, y: u32| -> Color {
         let mut rng = rand::thread_rng();
