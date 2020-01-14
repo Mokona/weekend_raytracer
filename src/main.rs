@@ -12,7 +12,7 @@ use color::Color;
 use hit::{Hittable, HittableList};
 use rand::Rng;
 use ray::Ray;
-use scenes::get_scene_1;
+use scenes::{get_scene_1, get_scene_2};
 use std::f64;
 use vector3::Vector3;
 
@@ -74,7 +74,7 @@ enum Scene {
 fn get_scene(scene: Scene, geometry: (u32, u32)) -> (HittableList, Camera) {
     match scene {
         Scene::Scene1 => get_scene_1(geometry),
-        Scene::Scene2 => get_scene_1(geometry),
+        Scene::Scene2 => get_scene_2(geometry),
     }
 }
 
@@ -83,7 +83,7 @@ fn main() {
     let height = 200;
     let sub_sample_count = 100;
 
-    let (world, camera) = get_scene(Scene::Scene1, (width, height));
+    let (world, camera) = get_scene(Scene::Scene2, (width, height));
 
     let output = ppm::get_file_content(width, height, |x: u32, y: u32| -> Color {
         let mut rng = rand::thread_rng();
