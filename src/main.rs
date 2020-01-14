@@ -127,7 +127,7 @@ fn main() {
     let up = Vector3::from((0., 1., 0.));
 
     let focus_distance = (look_from - look_at).norm();
-    let aperture = 1.5;
+    let aperture = 1.1;
 
     let camera = camera::Camera::new(
         look_from,
