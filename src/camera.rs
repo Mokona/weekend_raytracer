@@ -1,5 +1,6 @@
 use crate::ray::Ray;
 use crate::vector3::Vector3;
+use std::f64;
 
 pub struct Camera {
     lower_left_corner: Vector3,
@@ -8,12 +9,18 @@ pub struct Camera {
     origin: Vector3,
 }
 
+type Degrees = f64;
+
 impl Camera {
-    pub fn new() -> Self {
+    pub fn new(vertical_fov: Degrees, aspect_ratio: f64) -> Self {
+        let theta = vertical_fov * f64::consts::PI / 180.;
+        let half_height = (theta / 2.).tan();
+        let half_width = aspect_ratio * half_height;
+
         Camera {
-            lower_left_corner: Vector3::from((-2., -1., -1.)),
-            horizontal: Vector3::from((4., 0., 0.)),
-            vertical: Vector3::from((0., 2., 0.)),
+            lower_left_corner: Vector3::from((-half_width, -half_height, -1.)),
+            horizontal: Vector3::from((2. * half_width, 0., 0.)),
+            vertical: Vector3::from((0., 2. * half_height, 0.)),
             origin: Vector3::new(),
         }
     }

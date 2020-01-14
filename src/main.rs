@@ -114,14 +114,14 @@ fn main() {
         Vector3::from((0.3, -0.15, -0.5)),
         -0.20,
         Material::Dielectric(DielectricParams {
-            refraction_index: 1.2,
+            refraction_index: 1.3,
         }),
     ));
 
     let world = HittableList::new(vec![
         sphere_1, sphere_2, sphere_3, sphere_4, sphere_5, sphere_6,
     ]);
-    let camera = camera::Camera::new();
+    let camera = camera::Camera::new(120., width as f64 / height as f64);
 
     let output = ppm::get_file_content(width, height, |x: u32, y: u32| -> Color {
         let mut rng = rand::thread_rng();
