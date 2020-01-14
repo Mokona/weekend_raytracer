@@ -103,7 +103,7 @@ fn main() {
     ));
 
     let sphere_5 = Box::new(Sphere::new(
-        Vector3::from((-0.3, 0.15, -0.5)),
+        Vector3::from((-0.5, 0.15, -0.5)),
         0.15,
         Material::Dielectric(DielectricParams {
             refraction_index: 1.5,
@@ -121,7 +121,11 @@ fn main() {
     let world = HittableList::new(vec![
         sphere_1, sphere_2, sphere_3, sphere_4, sphere_5, sphere_6,
     ]);
-    let camera = camera::Camera::new(120., width as f64 / height as f64);
+
+    let look_from = Vector3::from((-2., 3., 1.5));
+    let look_at = Vector3::from((0., 0., -1.));
+    let up = Vector3::from((0., 1., 0.));
+    let camera = camera::Camera::new(look_from, look_at, up, 45., width as f64 / height as f64);
 
     let output = ppm::get_file_content(width, height, |x: u32, y: u32| -> Color {
         let mut rng = rand::thread_rng();
