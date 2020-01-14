@@ -125,7 +125,19 @@ fn main() {
     let look_from = Vector3::from((-2., 3., 1.5));
     let look_at = Vector3::from((0., 0., -1.));
     let up = Vector3::from((0., 1., 0.));
-    let camera = camera::Camera::new(look_from, look_at, up, 45., width as f64 / height as f64);
+
+    let focus_distance = (look_from - look_at).norm();
+    let aperture = 1.5;
+
+    let camera = camera::Camera::new(
+        look_from,
+        look_at,
+        up,
+        45.,
+        width as f64 / height as f64,
+        aperture,
+        focus_distance,
+    );
 
     let output = ppm::get_file_content(width, height, |x: u32, y: u32| -> Color {
         let mut rng = rand::thread_rng();
