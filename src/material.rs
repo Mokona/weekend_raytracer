@@ -5,59 +5,53 @@ use rand::Rng;
 
 type Attenuation = Vector3;
 
-#[derive(Copy, Clone)]
-pub enum Material {
-    Lambertian(LambertianParams),
-    Metal(MetalParams),
-    Dielectric(DielectricParams),
+pub trait Material {
+    fn scatter(&self, ray: &Ray, hit: &HitRecord) -> Option<(Ray, Vector3)>;
 }
 
-#[derive(Copy, Clone)]
-pub struct LambertianParams {
+pub struct Lambertian {
     pub albedo: Attenuation,
 }
 
-#[derive(Copy, Clone)]
-pub struct MetalParams {
+impl Material for Lambertian {
+    fn scatter(&self, _ray: &Ray, hit: &HitRecord) -> Option<(Ray, Vector3)> {
+        let diffuse_direction = hit.point + hit.normal + random_in_unit_sphere();
+        let diffuse_ray = Ray::new(hit.point, diffuse_direction - hit.point);
+
+        Some((diffuse_ray, self.albedo))
+    }
+}
+
+pub struct Metal {
     pub albedo: Attenuation,
     pub fuzziness: f64,
-}
-
-#[derive(Copy, Clone)]
-pub struct DielectricParams {
-    pub refraction_index: f64,
-}
-
-fn scatter_lambertian(
-    _ray: &Ray,
-    hit: &HitRecord,
-    params: LambertianParams,
-) -> Option<(Ray, Vector3)> {
-    let diffuse_direction = hit.point + hit.normal + random_in_unit_sphere();
-    let diffuse_ray = Ray::new(hit.point, diffuse_direction - hit.point);
-
-    Some((diffuse_ray, params.albedo))
 }
 
 fn reflect(incoming: Vector3, normal: Vector3) -> Vector3 {
     incoming - normal * 2. * incoming.dot(&normal)
 }
 
-fn scatter_metal(ray: &Ray, hit: &HitRecord, params: MetalParams) -> Option<(Ray, Vector3)> {
-    let reflected = reflect(ray.direction.normalized(), hit.normal);
+impl Material for Metal {
+    fn scatter(&self, ray: &Ray, hit: &HitRecord) -> Option<(Ray, Vector3)> {
+        let reflected = reflect(ray.direction.normalized(), hit.normal);
 
-    if reflected.dot(&hit.normal) > 0. {
-        let reflected_fuzziness = if params.fuzziness > 0. {
-            reflected + random_in_unit_sphere() * params.fuzziness.min(1.)
+        if reflected.dot(&hit.normal) > 0. {
+            let reflected_fuzziness = if self.fuzziness > 0. {
+                reflected + random_in_unit_sphere() * self.fuzziness.min(1.)
+            } else {
+                reflected
+            };
+            let reflected_ray = Ray::new(hit.point, reflected_fuzziness);
+
+            Some((reflected_ray, self.albedo))
         } else {
-            reflected
-        };
-        let reflected_ray = Ray::new(hit.point, reflected_fuzziness);
-
-        Some((reflected_ray, params.albedo))
-    } else {
-        None
+            None
+        }
     }
+}
+
+pub struct Dielectric {
+    pub refraction_index: f64,
 }
 
 fn refraction(incoming: Vector3, normal: Vector3, ni_over_nt: f64) -> Option<Vector3> {
@@ -79,40 +73,30 @@ fn schlick(cosine: f64, refraction_index: f64) -> f64 {
     r0 + (1. - r0) * (1. - cosine).powf(5.)
 }
 
-fn scatter_dielectric(
-    ray: &Ray,
-    hit: &HitRecord,
-    params: DielectricParams,
-) -> Option<(Ray, Vector3)> {
-    let reflected = reflect(ray.direction, hit.normal);
+impl Material for Dielectric {
+    fn scatter(&self, ray: &Ray, hit: &HitRecord) -> Option<(Ray, Vector3)> {
+        let reflected = reflect(ray.direction, hit.normal);
 
-    let (outward_normal, ni_overnt, cosine) = if ray.direction.dot(&hit.normal) > 0. {
-        let cosine =
-            params.refraction_index * ray.direction.dot(&hit.normal) / ray.direction.norm();
-        (-hit.normal, params.refraction_index, cosine)
-    } else {
-        let cosine = -ray.direction.dot(&hit.normal) / ray.direction.norm();
-        (hit.normal, 1.0 / params.refraction_index, cosine)
-    };
-
-    let (reflection_probability, refracted) =
-        match refraction(ray.direction, outward_normal, ni_overnt) {
-            Some(refracted) => (schlick(cosine, params.refraction_index), refracted),
-            None => (1., Vector3::default()),
+        let (outward_normal, ni_overnt, cosine) = if ray.direction.dot(&hit.normal) > 0. {
+            let cosine =
+                self.refraction_index * ray.direction.dot(&hit.normal) / ray.direction.norm();
+            (-hit.normal, self.refraction_index, cosine)
+        } else {
+            let cosine = -ray.direction.dot(&hit.normal) / ray.direction.norm();
+            (hit.normal, 1.0 / self.refraction_index, cosine)
         };
 
-    let attenuation = Vector3::from((1., 1., 1.));
-    if rand::thread_rng().gen_range(0., 1.) < reflection_probability {
-        Some((Ray::new(hit.point, reflected), attenuation))
-    } else {
-        Some((Ray::new(hit.point, refracted), attenuation))
-    }
-}
+        let (reflection_probability, refracted) =
+            match refraction(ray.direction, outward_normal, ni_overnt) {
+                Some(refracted) => (schlick(cosine, self.refraction_index), refracted),
+                None => (1., Vector3::default()),
+            };
 
-pub fn scatter(ray: &Ray, hit: &HitRecord) -> Option<(Ray, Vector3)> {
-    match hit.material {
-        Material::Lambertian(params) => scatter_lambertian(ray, hit, params),
-        Material::Metal(params) => scatter_metal(ray, hit, params),
-        Material::Dielectric(params) => scatter_dielectric(ray, hit, params),
+        let attenuation = Vector3::from((1., 1., 1.));
+        if rand::thread_rng().gen_range(0., 1.) < reflection_probability {
+            Some((Ray::new(hit.point, reflected), attenuation))
+        } else {
+            Some((Ray::new(hit.point, refracted), attenuation))
+        }
     }
 }

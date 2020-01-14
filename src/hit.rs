@@ -2,11 +2,11 @@ use crate::material::Material;
 use crate::ray::Ray;
 use crate::vector3::Vector3;
 
-pub struct HitRecord {
+pub struct HitRecord<'a> {
     pub t: f64,
     pub point: Vector3,
     pub normal: Vector3,
-    pub material: Material,
+    pub material: &'a dyn Material,
 }
 
 pub trait Hittable {
@@ -41,11 +41,11 @@ impl Hittable for HittableList {
 pub struct Sphere {
     center: Vector3,
     radius: f64,
-    material: Material,
+    material: Box<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Vector3, radius: f64, material: Material) -> Self {
+    pub fn new(center: Vector3, radius: f64, material: Box<dyn Material>) -> Self {
         Sphere {
             center,
             radius,
@@ -62,7 +62,7 @@ impl Sphere {
                 t: hit,
                 point: hit_point,
                 normal: (hit_point - self.center) / self.radius,
-                material: self.material,
+                material: &(*self.material),
             })
         } else {
             None
@@ -93,10 +93,10 @@ impl Hittable for Sphere {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::material::LambertianParams;
+    use crate::material::Lambertian;
 
-    fn get_dummy_material() -> Material {
-        Material::Lambertian(LambertianParams {
+    fn get_dummy_material() -> Box<dyn Material> {
+        Box::new(Lambertian {
             albedo: Vector3::default(),
         })
     }

@@ -26,7 +26,7 @@ fn color(ray: Ray, world: &HittableList, depth_limit: u32) -> Color {
     let hit_point = world.hit(&ray, 0.001, f64::MAX);
     match hit_point {
         Some(hit) => {
-            if let Some((reflection_ray, attenuation)) = material::scatter(&ray, &hit) {
+            if let Some((reflection_ray, attenuation)) = hit.material.scatter(&ray, &hit) {
                 let (r, g, b): (f64, f64, f64) =
                     color(reflection_ray, world, depth_limit + 1).into();
                 Color::from((
