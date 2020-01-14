@@ -79,8 +79,8 @@ fn get_scene(scene: Scene, geometry: (u32, u32)) -> (HittableList, Camera) {
 }
 
 fn main() {
-    let width = 400;
-    let height = 200;
+    let width = 800;
+    let height = 400;
     let sub_sample_count = 100;
 
     let (world, camera) = get_scene(Scene::Scene2, (width, height));

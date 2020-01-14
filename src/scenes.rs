@@ -178,7 +178,7 @@ pub fn get_scene_2((width, height): (u32, u32)) -> (HittableList, Camera) {
     let up = Vector3::from((0., 1., 0.));
 
     let focus_distance = (look_from - look_at).norm();
-    let aperture = 1.1;
+    let aperture = 0.3;
 
     let camera = Camera::new(
         look_from,
